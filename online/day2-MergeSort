@@ -1,0 +1,147 @@
+并归排序
+内容：
+    1.复杂度：O（N*logN）也就是说在复杂度上比一般的排序是更有优势的
+    2.原理：1）对数组取中点M
+	2）对数组M左半边进行排序
+	3）对数组M右半边进行排序
+	4）merge（将左右两边数组比较后，填写到临时数组，最后填写到原数组）
+    3.主要需要掌握merge算法
+
+
+方法1（递归）：
+    public static void mergeSort(int[] arr){
+        if (arr == null || arr.length < 2){
+            return;
+        }
+        process(arr, 0, arr.length - 1);
+    }
+    
+    public static void process(int[] arr, int L, int R){
+        if (L == R){
+            return;
+        }
+        int mid = L + ((R - L) >> 1);
+        process(arr, L, mid);
+        process(arr, mid + 1, R);
+        merge(arr, L, mid, R);
+    }
+
+    public static void merge(int[] arr, int L, int M, int R){
+        int[] help = new int[R - L + 1];
+        int i = 0;
+        int p1 = L;
+        int p2 = M +1;
+        //对p1和p2进行比对取最小放入help
+        while (p1 <= M && p2 <= R){
+            help[i++] = arr[p1]<= arr[p2] ? arr[p1++] : arr[p2++];
+        }
+        //要么p1越界，要么p2越界，去除p1或p2的剩下部分
+        while(p1 <= M){
+            help[i++] = arr[p1++];
+        }
+        while(p2 <= R){
+            help[i++] = arr[p2++];
+        }
+        //在help中排序好了之后，放入arr数组
+        for(i = 0; i < help.length; i++){
+            arr[L + i] = help[i];
+        }
+    }
+
+方法2（非递归）：
+    public static void mergeSort2(int[] arr){
+        if (arr == null || arr.length < 2){
+            return;
+        }
+        int N = arr.length;
+        //设置步长
+        int mergeSize = 1;
+        while(mergeSize < N){
+            int L = 0;
+            while(L < N){
+                int M = L + mergeSize - 1;
+                if(M >= N){
+                    break;
+                }
+                int R = Math.min(M + mergeSize, N - 1);
+                merge(arr, L, M, R);
+                L = R + 1;
+            }
+            //防溢出
+            if(mergeSize > N / 2){
+                break;
+            }
+            mergeSize <<= 1;//步长*2
+        }
+    }
+    public static void merge(int[] arr, int L, int M, int R){
+        int[] help = new int[R - L + 1];
+        int i = 0;
+        int p1 = L;
+        int p2 = M +1;
+        //对p1和p2进行比对取最小放入help
+        while (p1 <= M && p2 <= R){
+            help[i++] = arr[p1]<= arr[p2] ? arr[p1++] : arr[p2++];
+        }
+        //要么p1越界，要么p2越界，去除p1或p2的剩下部分
+        while(p1 <= M){
+            help[i++] = arr[p1++];
+        }
+        while(p2 <= R){
+            help[i++] = arr[p2++];
+        }
+        //在help中排序好了之后，放入arr数组
+        for(i = 0; i < help.length; i++){
+            arr[L + i] = help[i];
+        }
+    }
+
+3.小和问题
+    要求：数组所有左边的数比自身小的全部累加起来求和，并排序
+    思路：利用归并排序思想，将数组分为左右组，一直分到最小情况后，对其进行排序，每次左组添加时进行累加。
+代码：
+    public static int smallSum(int[] arr){
+        if (arr == null && arr.length <2){
+            return 0;
+        }
+        return process(arr, 0, arr.length - 1);
+    }
+
+    public static int process(int[] arr, int l, int r){
+        if(l==r){
+            return 0;
+        }
+        //l < r
+        int mid = l + ((r - l) >> 1);//取中点
+        return
+                process(arr, l, mid)
+                +
+                process(arr, mid + 1, r)
+                +
+                merge(arr, l, mid, r);
+    }
+
+    public static int merge(int[] arr, int L, int M, int R){
+        int[] help = new int[R - L + 1];
+        int i = 0;
+        int p1 = L;
+        int p2 = M +1;
+        int res = 0;
+        //对p1和p2进行比对取最小放入help
+        while (p1 <= M && p2 <= R){
+            res += arr[p1] < arr[p2] ? (R - p2 + 1) * arr[p1] : 0;
+            help[i++] = arr[p1]<= arr[p2] ? arr[p1++] : arr[p2++];
+        }
+        //要么p1越界，要么p2越界，去除p1或p2的剩下部分
+        while(p1 <= M){
+            help[i++] = arr[p1++];
+        }
+        while(p2 <= R){
+            help[i++] = arr[p2++];
+        }
+        //在help中排序好了之后，放入arr数组
+        for(i = 0; i < help.length; i++){
+            arr[L + i] = help[i];
+        }
+        return res;
+    }
