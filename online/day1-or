@@ -1,0 +1,85 @@
+异或算法
+
+1.实现a与b的数据交换 同样可以用于数组（i位置和j位置必须不同）
+a = a ^ b;
+b = a ^ b;
+a = a ^ b;
+
+2.数组中所有数都出现偶数次，只有一个出现奇数次，要求 找出奇数次这个数
+    public static int trouversingle(int[] arr){
+        int eor = 0;
+        for(int i = 0; i < arr.length; i++){
+            eor ^= arr[i];
+        }
+        return eor;
+    }
+3.在int中找出二进制最右边的1
+int eor = eor & (-eor);
+
+4.数组中所有数都出现偶数次，只有两个出现奇数次，要求 找出奇数次这两个数
+思路：	1）利用trouversingle得到一个数eor = a^b (a和b是两个奇数次的数)
+	2）提取eor上最右侧二进制的1（以此来对数组进行分类，分为在此位的二进制为1和为0的两类）
+	3）将分好的两组数组全部进行异或即可得到a和b
+
+    public  static void trouverdouble(int[] arr){
+        int eor = trouversingle(arr);
+        int rightOne = eor & (-eor);//int a = eor & (~eor + 1)提取出最右边的1
+        int eor2 = 0;
+        //对数组进行遍历
+        for(int i = 0; i < arr.length; i++){
+            //开始以rightOne进行分类，分为有1和无1，然后对这两个分类分别异或
+            if((arr[i] & rightOne) != 0){
+                eor2 ^= arr[i];//得出两个数中的一个数字
+            }
+        }
+        eor = (eor ^ eor2);//得出另一个奇数位数字
+        System.out.println(eor2 + " " + eor);
+    }
+}
+
+5.一个数组中有一种数全部出现K次，其余都出现M次，M > 1 && K < M(要求：找到出现K次的数，空间复杂度为O（1）时间复杂度为O（N))
+   
+    思路1：	
+	1）将K变成二进制每一二进制拆分进数组
+	2）利用&，依次提取二进制数的每一位状态
+	3）根据题意，每位二进制出现的次数若是不能被M整除，说明常数K在这一位二进制上有1，以此来推断出K的值
+
+    public static int trouverK(int[] arr, int K, int M){
+        int[] arr1 = new int[32];//因为int在java中是32位，因此建立一个数组来存放这个int数字 计算每一位的出现次数
+        for(int num : arr){//遍历arr数组
+            //将arr数组上的数放在arr1上
+            /*for(int i = 0; i <= 31; i++){
+                if(((num >> i) & 1) != 0){//依次提取二进制数的每一位状态
+                    arr1[i]++;
+                }
+            }*/
+            arr1[i] += (num >> i) & 1;//上述优化
+        }
+        int ans = 0;
+        for(int j = 0; j < 32; j++){
+             if(arr1[j] % M != 0){//说明这个数在第j位上有1
+                ans |= (1 << j);//将1放在这个数的第j位置
+             }
+        }
+        return ans;
+    }
+
+    思路2：
+	1）利用Hash表来完成（可用于比对验证思路1）
+    
+    public  static int test(int[] arr, int k, int m){
+        HashMap<Integer,Integer> map = new HashMap<>();
+        for (int num : arr){
+            if (map.containsKey(num)){
+                map.put(num, map.get(num) + 1);
+            }else{
+                map.put(num, 1);
+            }
+        }
+        for(int num : map.keySet()){
+            if (map.get(num) == k){
+                return num;
+            }
+        }
+        return -1;
+    }
