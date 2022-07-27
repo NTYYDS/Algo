@@ -1,0 +1,38 @@
+GetLoopNode：
+    要求：如果两个链表长度之和为N，时间复杂度达到O（N），额外空间复杂度O（0）
+    内容：给定两个可能有环也可能无环的单链表，头节点head1和head2.请实现一个函数，如果两个链表相交，请返回相交的第一个节点，如果不相交，返回null
+    思路：（不知道怎么证明，但是确实是这样）
+	1）将链表分为两个部分直链部分和环部分（包含极端情况直链部分可以为0，环部分可以为1）
+	2）设定两个指针S,F都从head出发，S每次移动1个node，F每次移动两个node，若是为直链，F直接到NULL停止，若是为环则F和S必定会在相交的第一个结点相遇
+  
+      public static Node getLoopNode(Node head){
+        if (head == null || head.next == null || head.next.next == null){
+            return null;
+        }
+        Node n1 = head.next;
+        Node n2 = head.next.next;
+        while(n1 != n2){
+            if (n2.next == null || n2.next.next == null){
+                return null;
+            }
+            n2 = n2.next.next;
+            n1 = n1.next;
+        }
+        //走到这说明是环
+        n2 = head;//n2->walk again from head
+        while(n1 != n2){
+            //将n2的步长变为1步
+            n2 = n2.next;
+            n1 = n1.next;
+        }
+        return n1;//此时找到入环结点
+    }
+
+    public static class Node{
+        public int value;
+        public Node next;
+
+        public Node(int data){
+            this.value = data;
+        }
+    }
