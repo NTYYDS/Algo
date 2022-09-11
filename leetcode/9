@@ -1,0 +1,40 @@
+//方法1 利用数学巧算
+class Solution {
+    public boolean isPalindrome(int x) {
+        int m = x;
+        int res = 0;
+        if(x<0){
+            return false;
+        }
+        else{          
+            while(x>0){
+                int y = x % 10;
+                x/=10;
+                res = res * 10 + y;
+            }
+        }
+        if(res == m){
+            return true;
+        }else{
+            return false;
+        }
+    }
+}
+//方法2 利用char
+class Solution {
+    public boolean isPalindrome(int x) {
+
+        String num=Integer.toString(x);
+        int l=num.length();
+    
+        for(int i=0;i<l/2;i++)
+        {
+            if(num.charAt(i) != num.charAt(l-(i+1)) )
+            {
+                return false;
+            }
+        }
+        return true;
+    
+    }
+}
