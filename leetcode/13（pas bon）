@@ -1,0 +1,32 @@
+class Solution {
+    public int romanToInt(String s) {
+        int res = 0;
+        char[] arr = {'M', 'D', 'C', 'L', 'X', 'V', 'I'};//char数组用单引号 String数组双引号
+        int[] arr2 = {1000, 500, 100, 50, 10, 5, 1};
+        for(int i = 0; i <= s.length() - 1; i++){
+            for(int j = 0; j < arr.length; j++){
+                if(s.charAt(i) == arr[j]){
+                    //判断本位是否为C/X/I 若为C/X/I则判断下一位，若下一位大于这一位 则res减去本位
+                    if((j == 2 || j == 4 || j == 6) && i != s.length()-1 ){
+                        int k = 0;
+                        for(; k < arr.length; k++){
+                            if(s.charAt(i+1) == arr[k]){
+                                break;
+                            }
+                        }
+                        if(arr2[j] < arr2[k]){
+                            res -= arr2[j];
+                        }
+                        else{
+                            res += arr2[j];
+                        }
+                    }
+                    else{
+                        res += arr2[j];
+                    }
+                }
+            }
+        }
+        return res;
+    }
+}
