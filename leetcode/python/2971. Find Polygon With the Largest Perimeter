@@ -1,0 +1,18 @@
+class Solution(object):
+    def largestPerimeter(self, nums):
+        """
+        :type nums: List[int]
+        :rtype: int
+        """
+        index = len(nums)
+        nums.sort(reverse=True) #降序排序
+        total = sum(nums)
+        while index >= 3:
+            i = 0
+            if total - nums[0] > nums[0]:
+                return total
+            else:
+                total = total - nums[0]
+                nums.pop(0)
+                index = index - 1
+        return -1
