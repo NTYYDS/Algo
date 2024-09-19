@@ -1,0 +1,56 @@
+#!/bin/bash
+
+# Parse the arguments
+for i in "$@"; do
+  case $i in
+    --transparent-type=*)
+      TYPE="${i#*=}"
+      shift
+      ;;
+    --stage=*)
+      STAGE="${i#*=}"
+      shift
+      ;;
+    -*|--*)
+      echo "Unknown option $i"
+      shift
+      ;;
+    *)
+      ;;
+  esac
+done
+
+case "$STAGE" in
+post-start)
+  # At the post-start stage
+  if [ "$TYPE" = "tproxy" ]; then
+    # Disable bridge netfilter call and remove interface exclusion rules in nftables
+    modprobe br_netfilter
+    sysctl net.bridge.bridge-nf-call-ip6tables=0
+    sysctl net.bridge.bridge-nf-call-iptables=0
+    sysctl net.bridge.bridge-nf-call-arptables=0
+
+    # Define the table, chain, and subchain names
+    TABLE="inet"
+    CHAIN="v2raya"
+    SUBCHAIN="tp_rule"
+
+    # List the rules with handle numbers and delete matching rules
+    nft -a list chain "$TABLE" "$CHAIN" "$SUBCHAIN" | while read -r line; do
+      # Check if the line contains interface exclusions for "br-*" or "docker*"
+      if echo "$line" | grep -E -q 'iifname "(br-\*|docker\*)" return'; then
+        # Extract the handle number
+        handle=$(echo "$line" | grep -o 'handle [0-9]*' | awk '{print $2}')
+        if [ -n "$handle" ]; then
+          echo "Deleting rule with handle $handle: $line"
+          nft delete rule "$TABLE" "$CHAIN" "$SUBCHAIN" handle "$handle"
+        fi
+      fi
+    done
+  fi
+  ;;
+*)
+  ;;
+esac
+
+exit 0
